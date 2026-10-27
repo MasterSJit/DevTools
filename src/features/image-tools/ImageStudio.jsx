@@ -45,8 +45,6 @@ import {
   IconMinimize,
   IconPlayerPlay,
 } from '@tabler/icons-react';
-import ToolHeader from '@/shared/components/ToolHeader';
-import ViewToggle from '@/shared/components/ViewToggle';
 import { useViewStore } from '@/shared/stores/view.store';
 
 /* ───────────────────────── helpers ───────────────────────── */

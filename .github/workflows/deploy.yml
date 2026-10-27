@@ -1,0 +1,40 @@
+# Builds the static site on GitHub and publishes ./out to the `deploy` branch.
+# Enhance tracks the `deploy` branch (no build script, no publish directory, runtime: None),
+# so the hosting server only receives the finished ~50 MB site instead of building it.
+name: Build & publish static site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build:static
+
+      - name: Publish out/ to the deploy branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: deploy
+          publish_dir: ./out
+          force_orphan: true
+          commit_message: 'deploy: ${{ github.sha }}'
