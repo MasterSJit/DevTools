@@ -1,0 +1,22 @@
+name = "devforge-proxy"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# Same-origin route: the static site and the Worker share dev-tools.serversbay.com,
+# so the browser needs no CORS for production.
+routes = [
+  { pattern = "dev-tools.serversbay.com/api/*", zone_name = "serversbay.com" }
+]
+
+[vars]
+# Browser origins allowed to call the proxy (others get 403). Requests without an Origin header (same-origin GETs) are allowed.
+ALLOWED_ORIGINS = "https://dev-tools.serversbay.com,http://localhost:3123,http://localhost:3000,http://localhost:3130"
+
+# 30 requests per minute per visitor IP
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60

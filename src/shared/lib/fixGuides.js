@@ -1,0 +1,274 @@
+// Step-by-step remediation guides referenced by `fix` ids on security findings.
+// snippets: [platform, language, code]
+
+export const PLATFORMS = ['Nginx', 'Apache', 'Cloudflare', 'Node.js', 'Laravel / PHP', 'Next.js', 'DNS'];
+
+const nextHeaders = (lines) => `// next.config.js
+module.exports = {
+  async headers() {
+    return [{
+      source: '/(.*)',
+      headers: [
+${lines.map(([k, v]) => `        { key: '${k}', value: '${v.replace(/'/g, "\\'")}' },`).join('\n')}
+      ],
+    }];
+  },
+};`;
+
+const header = (name, value, extra = {}) => [
+  ['Nginx', 'nginx', `# inside server { … } (or http { … } for all sites), then: nginx -t && systemctl reload nginx\nadd_header ${name} "${value}" always;`],
+  ['Apache', 'apache', `# .htaccess or <VirtualHost> (needs mod_headers: a2enmod headers)\nHeader always set ${name} "${value}"`],
+  ...(extra.cloudflare ? [['Cloudflare', 'text', extra.cloudflare]] : [['Cloudflare', 'text', `Rules → Transform Rules → Modify Response Header → Create rule\n  When: All incoming requests\n  Then: Set static → Header name: ${name} → Value: ${value}\nDeploy, then re-run this check.`]]),
+  ['Node.js', 'javascript', extra.node || `// Express\napp.use((req, res, next) => {\n  res.setHeader('${name}', '${value.replace(/'/g, "\\'")}');\n  next();\n});`],
+  ['Laravel / PHP', 'php', extra.php || `// app/Http/Middleware/SecurityHeaders.php → handle()\n$response = $next($request);\n$response->headers->set('${name}', '${value.replace(/'/g, "\\'")}');\nreturn $response;\n// register it in app/Http/Kernel.php ($middleware) or bootstrap/app.php (Laravel 11+)`],
+  ['Next.js', 'javascript', nextHeaders([[name, value]])],
+];
+
+export const FIX_GUIDES = {
+  hsts: {
+    title: 'Enable HTTP Strict Transport Security (HSTS)',
+    why: 'HSTS tells browsers to always use HTTPS for your domain, blocking SSL-stripping attacks on public Wi-Fi.',
+    steps: [
+      'Make sure every page — and every subdomain if you use includeSubDomains — works over HTTPS.',
+      'Start with a short max-age (e.g. 300 seconds) and check nothing breaks.',
+      'Raise max-age to 31536000 (1 year) and add includeSubDomains.',
+      'Optional: add “preload” and submit the domain at hstspreload.org (hard to undo — only when everything is HTTPS).',
+    ],
+    snippets: header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains', {
+      cloudflare: 'SSL/TLS → Edge Certificates → HTTP Strict Transport Security (HSTS) → Enable HSTS\n  Max Age: 12 months · Apply to subdomains: On · Preload: only when ready · No-Sniff: On',
+      node: "// npm i helmet\nconst helmet = require('helmet');\napp.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true }));",
+    }),
+    verify: 'curl -sI https://your-site.com | grep -i strict-transport',
+  },
+  csp: {
+    title: 'Add a Content-Security-Policy',
+    why: 'CSP limits where scripts, styles and frames can load from, so an injected <script> cannot run.',
+    steps: [
+      'Start with Content-Security-Policy-Report-Only so nothing breaks while you test.',
+      'Open your site with DevTools → Console and note every “Refused to load…” report; add those origins to the right directive.',
+      'Replace inline <script> blocks with external files, or add a per-request nonce (\'nonce-…\') instead of \'unsafe-inline\'.',
+      'Always include object-src \'none\', base-uri \'self\' and frame-ancestors \'self\' (or \'none\').',
+      'When the console is clean for a few days, rename the header to Content-Security-Policy to enforce it.',
+    ],
+    snippets: header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; upgrade-insecure-requests", {
+      node: "// npm i helmet — helmet sets a strict default CSP you can extend\nconst helmet = require('helmet');\napp.use(helmet.contentSecurityPolicy({\n  directives: {\n    defaultSrc: [\"'self'\"],\n    scriptSrc: [\"'self'\"],\n    objectSrc: [\"'none'\"],\n    baseUri: [\"'self'\"],\n    frameAncestors: [\"'self'\"],\n  },\n}));",
+    }),
+    verify: 'Re-run this check and the CSP evaluator tab; test the site with DevTools Console open.',
+  },
+  frame: {
+    title: 'Block clickjacking (framing by other sites)',
+    why: 'Without it, an attacker can load your site in an invisible iframe and trick users into clicking buttons.',
+    steps: [
+      'If your pages never need to be embedded, use X-Frame-Options: DENY.',
+      'If you embed your own pages, use SAMEORIGIN.',
+      'Also set CSP frame-ancestors (the modern replacement) — e.g. frame-ancestors \'self\'.',
+    ],
+    snippets: header('X-Frame-Options', 'SAMEORIGIN', { node: "const helmet = require('helmet');\napp.use(helmet.frameguard({ action: 'sameorigin' }));" }),
+  },
+  nosniff: {
+    title: 'Stop MIME sniffing (X-Content-Type-Options)',
+    why: 'Prevents browsers from treating an uploaded text/image file as executable JavaScript or HTML.',
+    steps: ['Add X-Content-Type-Options: nosniff to every response.', 'Make sure your server sends correct Content-Type headers for .js, .css, .json and uploads.'],
+    snippets: header('X-Content-Type-Options', 'nosniff', { node: "const helmet = require('helmet');\napp.use(helmet.noSniff());" }),
+  },
+  referrer: {
+    title: 'Set a Referrer-Policy',
+    why: 'Stops full URLs (which may contain tokens or IDs) from leaking to third-party sites.',
+    steps: ['Use strict-origin-when-cross-origin (the modern browser default) or no-referrer for sensitive apps.'],
+    snippets: header('Referrer-Policy', 'strict-origin-when-cross-origin'),
+  },
+  permissions: {
+    title: 'Restrict browser features with Permissions-Policy',
+    why: 'Prevents embedded or injected code from using the camera, microphone, location, payments, etc.',
+    steps: ['List the features your site really uses.', 'Disable everything else with an empty allow-list ().'],
+    snippets: header('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()'),
+  },
+  coop: {
+    title: 'Isolate your window (Cross-Origin-Opener-Policy)',
+    why: 'COOP stops cross-origin popups from keeping a reference to your window (XS-Leaks, Spectre-style attacks).',
+    steps: ['Set Cross-Origin-Opener-Policy: same-origin.', 'If you use OAuth/payment popups that must talk back via window.opener, use same-origin-allow-popups instead.'],
+    snippets: header('Cross-Origin-Opener-Policy', 'same-origin'),
+  },
+  cors: {
+    title: 'Lock down CORS',
+    why: 'A permissive Access-Control-Allow-Origin lets any website read your API responses from a visitor’s browser.',
+    steps: [
+      'Never combine Access-Control-Allow-Origin: * with Access-Control-Allow-Credentials: true.',
+      'Never reflect the request’s Origin header blindly, and never allow the “null” origin.',
+      'Keep an explicit allow-list of trusted origins and only echo back origins on that list (add Vary: Origin).',
+      'Public, non-personal APIs may keep *, but without credentials.',
+    ],
+    snippets: [
+      ['Nginx', 'nginx', 'set $cors "";\nif ($http_origin ~* ^https://(www\\.)?example\\.com$) { set $cors $http_origin; }\nadd_header Access-Control-Allow-Origin $cors always;\nadd_header Vary Origin always;'],
+      ['Node.js', 'javascript', "// npm i cors\nconst cors = require('cors');\napp.use(cors({ origin: ['https://example.com', 'https://app.example.com'], credentials: true }));"],
+      ['Laravel / PHP', 'php', "// config/cors.php\n'allowed_origins' => ['https://example.com'],\n'supports_credentials' => true,"],
+    ],
+  },
+  disclosure: {
+    title: 'Hide server and framework versions',
+    why: 'Version banners (nginx/1.18.0, X-Powered-By: PHP/8.1) tell attackers exactly which exploits to try.',
+    steps: ['Turn off version tokens in the web server.', 'Remove X-Powered-By and similar headers from the app/runtime.', 'Keep the software patched — hiding versions is not a substitute for updates.'],
+    snippets: [
+      ['Nginx', 'nginx', '# http { … }\nserver_tokens off;\n# with headers-more module: more_clear_headers Server;'],
+      ['Apache', 'apache', '# apache2.conf / httpd.conf\nServerTokens Prod\nServerSignature Off\nHeader always unset X-Powered-By'],
+      ['Node.js', 'javascript', "app.disable('x-powered-by');"],
+      ['Laravel / PHP', 'ini', '; php.ini\nexpose_php = Off'],
+      ['Next.js', 'javascript', '// next.config.js\nmodule.exports = { poweredByHeader: false };'],
+    ],
+  },
+  cookies: {
+    title: 'Secure your cookies (Secure, HttpOnly, SameSite)',
+    why: 'Secure keeps cookies off plain HTTP, HttpOnly hides session cookies from JavaScript/XSS, SameSite blocks most CSRF.',
+    steps: ['Add Secure to every cookie on an HTTPS site.', 'Add HttpOnly to session/auth cookies (not to cookies your JS must read).', 'Set SameSite=Lax (or Strict for admin panels).', 'Prefer the __Host- name prefix for session cookies (requires Secure, Path=/, no Domain).'],
+    snippets: [
+      ['Laravel / PHP', 'php', "// config/session.php (Laravel)\n'secure' => env('SESSION_SECURE_COOKIE', true),\n'http_only' => true,\n'same_site' => 'lax',\n\n// plain PHP (php.ini)\n// session.cookie_secure = 1\n// session.cookie_httponly = 1\n// session.cookie_samesite = \"Lax\""],
+      ['Node.js', 'javascript', "res.cookie('session', token, { secure: true, httpOnly: true, sameSite: 'lax', path: '/' });\n// express-session: cookie: { secure: true, httpOnly: true, sameSite: 'lax' }"],
+      ['Nginx', 'nginx', '# patch cookies set by an upstream app (nginx ≥ 1.19.3)\nproxy_cookie_flags ~ secure httponly samesite=lax;'],
+      ['Apache', 'apache', 'Header always edit Set-Cookie ^(.*)$ "$1; Secure; HttpOnly; SameSite=Lax"'],
+    ],
+  },
+  'https-redirect': {
+    title: 'Redirect all HTTP traffic to HTTPS',
+    why: 'Visitors who type the bare domain land on unencrypted HTTP unless you redirect them (and HSTS can then take over).',
+    steps: ['Add a permanent (301) redirect from http:// to https:// for every host and path.', 'Then enable HSTS so browsers skip HTTP entirely next time.'],
+    snippets: [
+      ['Nginx', 'nginx', 'server {\n  listen 80;\n  server_name example.com www.example.com;\n  return 301 https://$host$request_uri;\n}'],
+      ['Apache', 'apache', 'RewriteEngine On\nRewriteCond %{HTTPS} !=on\nRewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]'],
+      ['Cloudflare', 'text', 'SSL/TLS → Edge Certificates → Always Use HTTPS → On\n(and set SSL/TLS encryption mode to Full (strict))'],
+    ],
+  },
+  xxss: {
+    title: 'Retire X-XSS-Protection',
+    why: 'Browsers removed the XSS auditor; the old “1; mode=block” value can even introduce information leaks.',
+    steps: ['Set X-XSS-Protection: 0 (or remove the header).', 'Rely on a Content-Security-Policy instead.'],
+    snippets: header('X-XSS-Protection', '0'),
+  },
+
+  // ── E-mail authentication ──
+  spf: {
+    title: 'Publish a correct SPF record',
+    why: 'SPF lists the servers allowed to send e-mail for your domain; without it anyone can spoof you.',
+    steps: [
+      'List every service that sends mail as your domain: Google Workspace / Microsoft 365, transactional mail (Brevo, SendGrid, SES), newsletters, your own server IP.',
+      'Create ONE TXT record at the root (@). Never publish two SPF records.',
+      'Use include: for providers and ip4:/ip6: for your servers. Keep it to 10 DNS lookups or fewer.',
+      'Start with ~all (softfail). After DMARC reports show all legitimate mail passes, switch to -all.',
+    ],
+    snippets: [
+      ['DNS', 'text', 'Type: TXT   Name: @   TTL: Auto\nValue: v=spf1 ip4:203.0.113.10 include:_spf.google.com include:spf.brevo.com ~all'],
+      ['Cloudflare', 'text', 'DNS → Records → Add record\n  Type: TXT · Name: @ · Content: v=spf1 include:_spf.google.com ~all\nEdit the existing SPF record instead of adding a second one.'],
+    ],
+    verify: 'Re-run the E-mail security check, or: dig +short TXT example.com',
+  },
+  dmarc: {
+    title: 'Roll out DMARC (none → quarantine → reject)',
+    why: 'DMARC tells receivers what to do with mail that fails SPF/DKIM and sends you reports of who is sending as you.',
+    steps: [
+      'Create a mailbox (or use a free DMARC report service) to receive aggregate reports.',
+      'Publish p=none with rua= reporting and watch the reports for 2–4 weeks.',
+      'Fix every legitimate sender that fails (add it to SPF, enable DKIM).',
+      'Move to p=quarantine (optionally pct=25 → 100), then to p=reject.',
+    ],
+    snippets: [
+      ['DNS', 'text', 'Type: TXT   Name: _dmarc\nStep 1: v=DMARC1; p=none; rua=mailto:dmarc@example.com; fo=1\nStep 2: v=DMARC1; p=quarantine; pct=100; rua=mailto:dmarc@example.com\nStep 3: v=DMARC1; p=reject; rua=mailto:dmarc@example.com'],
+      ['Cloudflare', 'text', 'Email → DMARC Management → Enable — Cloudflare creates the _dmarc record and shows the reports for free.'],
+    ],
+  },
+  dkim: {
+    title: 'Enable DKIM signing',
+    why: 'DKIM adds a cryptographic signature to outgoing mail so receivers can verify it really came from you.',
+    steps: [
+      'In each sending service, open the domain-authentication / DKIM settings and generate a key (2048-bit).',
+      'Add the TXT (or CNAME) record it gives you at <selector>._domainkey.',
+      'Go back to the service and click “Verify / Start authentication”.',
+      'Send a test mail to Gmail → ⋮ → Show original and check “DKIM: PASS”.',
+    ],
+    snippets: [
+      ['DNS', 'text', 'Google Workspace: Admin console → Apps → Google Workspace → Gmail → Authenticate email → Generate new record\nMicrosoft 365: Defender portal → Email & collaboration → Policies → DKIM → Enable\nBrevo: Senders, domains & dedicated IPs → Domains → Authenticate\n\nThen add e.g.  Type: TXT  Name: google._domainkey  Value: v=DKIM1; k=rsa; p=MIIBIjANBg…'],
+    ],
+  },
+  'null-mail': {
+    title: 'Lock down a domain that sends no e-mail',
+    why: 'Parked or web-only domains are easy to spoof unless you explicitly say “no mail comes from here”.',
+    steps: ['Publish SPF that allows nothing.', 'Publish DMARC with p=reject.', 'Optionally add a null MX record.'],
+    snippets: [['DNS', 'text', 'TXT  @        v=spf1 -all\nTXT  _dmarc   v=DMARC1; p=reject;\nMX   @        0 .']],
+  },
+  'mta-sts': {
+    title: 'Enable MTA-STS (encrypted inbound mail)',
+    why: 'Forces other mail servers to use verified TLS when delivering to you, preventing downgrade attacks.',
+    steps: [
+      'Host a policy file at https://mta-sts.example.com/.well-known/mta-sts.txt (needs a valid certificate).',
+      'Start with mode: testing, list your MX hosts, max_age: 86400.',
+      'Add the _mta-sts TXT record with a new id each time the policy changes.',
+      'After a week of clean TLS-RPT reports, switch to mode: enforce.',
+    ],
+    snippets: [
+      ['DNS', 'text', 'TXT  _mta-sts   v=STSv1; id=20261027'],
+      ['Nginx', 'text', '# https://mta-sts.example.com/.well-known/mta-sts.txt\nversion: STSv1\nmode: testing\nmx: aspmx.l.google.com\nmx: *.aspmx.l.google.com\nmax_age: 86400'],
+    ],
+  },
+  'tls-rpt': {
+    title: 'Enable SMTP TLS reporting (TLS-RPT)',
+    why: 'Receivers send you daily reports when TLS delivery to your mail servers fails.',
+    steps: ['Add one TXT record pointing to a mailbox that collects reports.'],
+    snippets: [['DNS', 'text', 'TXT  _smtp._tls   v=TLSRPTv1; rua=mailto:tls-reports@example.com']],
+  },
+  caa: {
+    title: 'Restrict certificate issuance with CAA',
+    why: 'CAA records say which certificate authorities may issue for your domain; others must refuse.',
+    steps: [
+      'Find the CAs you actually use (the Subdomain Finder / Certificate Decoder shows recent issuers).',
+      'Add one CAA “issue” record per CA, plus “issuewild” if you use wildcard certs.',
+      'Add an iodef record to be told about refused requests.',
+    ],
+    snippets: [
+      ['DNS', 'text', 'CAA  @  0 issue "letsencrypt.org"\nCAA  @  0 issue "pki.goog"\nCAA  @  0 issuewild "letsencrypt.org"\nCAA  @  0 iodef "mailto:security@example.com"'],
+      ['Cloudflare', 'text', 'DNS → Add record → Type CAA → Tag “Only allow specific hostnames” → CA domain name: letsencrypt.org\nNote: Cloudflare automatically adds CAA records for the CAs its Universal SSL uses.'],
+    ],
+  },
+
+  'dangling-cname': {
+    title: 'Remove dangling CNAME records (prevent subdomain takeover)',
+    why: 'A CNAME pointing to a deleted cloud resource (GitHub Pages, Heroku, Azure, S3…) can be claimed by anyone, who then serves content on your subdomain.',
+    steps: [
+      'For each flagged name, check whether the target service/app still exists in your account.',
+      'If it is no longer used: delete the CNAME record now.',
+      'If it is still needed: re-create the resource with the same name in your account so nobody else can claim it.',
+      'Add “delete DNS record” to your decommissioning checklist and re-run this scan monthly.',
+    ],
+    snippets: [
+      ['Cloudflare', 'text', 'DNS → Records → search the subdomain → Edit → Delete'],
+      ['DNS', 'bash', 'dig +short CNAME old.example.com      # shows the target\ndig +short A $(dig +short CNAME old.example.com)   # empty = dangling'],
+    ],
+  },
+
+  // ── Domain registration ──
+  'transfer-lock': {
+    title: 'Turn on the registrar (transfer) lock',
+    why: 'A locked domain cannot be transferred away without you first unlocking it — protects against hijacking.',
+    steps: ['Log in to your registrar → Domains → select the domain.', 'Enable “Domain lock” / “Transfer lock” (sets clientTransferProhibited).', 'Enable 2FA on the registrar account.'],
+    snippets: [['Cloudflare', 'text', 'Cloudflare Registrar locks domains automatically. For other registrars look for “Domain lock” or “Theft protection”.']],
+  },
+  dnssec: {
+    title: 'Enable DNSSEC',
+    why: 'Signs your DNS answers so resolvers can detect forged responses (cache poisoning).',
+    steps: ['Enable DNSSEC at your DNS provider — it generates a DS record.', 'Add the DS record at your registrar (automatic when DNS and registrar are the same company).', 'Wait up to 24 h and re-run the lookup.'],
+    snippets: [['Cloudflare', 'text', 'DNS → Settings → DNSSEC → Enable DNSSEC → copy the DS record to your registrar\n(Cloudflare Registrar adds it automatically).']],
+  },
+  renew: {
+    title: 'Never let the domain expire',
+    why: 'Expired domains go offline and can be re-registered by anyone — including attackers.',
+    steps: ['Turn on auto-renew at the registrar.', 'Keep the payment card and the account e-mail up to date.', 'Consider renewing for several years and add a calendar reminder 60 days before expiry.'],
+    snippets: [],
+  },
+  'cert-renew': {
+    title: 'Automate certificate renewal',
+    why: 'Expired certificates cause hard browser errors; manual renewals are easy to forget.',
+    steps: ['Use an ACME client (certbot, acme.sh, Caddy) or your CDN’s managed certificates.', 'Check the renewal timer/cron is active.', 'Monitor expiry — renew at least 30 days before notAfter.'],
+    snippets: [
+      ['Nginx', 'bash', 'sudo certbot --nginx -d example.com -d www.example.com\nsystemctl list-timers | grep certbot   # verify auto-renew\nsudo certbot renew --dry-run'],
+      ['Apache', 'bash', 'sudo certbot --apache -d example.com -d www.example.com\nsudo certbot renew --dry-run'],
+      ['Cloudflare', 'text', 'SSL/TLS → Edge Certificates: Universal SSL renews automatically.\nFor the origin, use a Cloudflare Origin Certificate (15 years) with SSL mode Full (strict).'],
+    ],
+  },
+};
