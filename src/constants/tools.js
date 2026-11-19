@@ -6,6 +6,8 @@ import {
   IconShieldLock, IconDeviceMobileCode, IconFileSearch, IconPhotoShield, IconWorldSearch,
   IconNetwork, IconLetterA, IconBinary, IconCode, IconSparkles, IconTransform, IconSquareKey,
   IconLockSquareRounded, IconSpy, IconShieldHalf, IconAt, IconBug, IconWorldWww, IconSitemap, IconSeo,
+  IconWand, IconArrowsShuffle, IconFileZip, IconFolderCog, IconFingerprint, IconTextScan2, IconPhotoScan,
+  IconGauge, IconRadar, IconPlug, IconFileCertificate, IconTargetArrow,
 } from '@tabler/icons-react';
 
 /**
@@ -19,6 +21,7 @@ export const CATEGORIES = [
   { id: 'convert', label: 'Encoders & Converters', desc: 'Base64, URLs, escaping, timestamps, colors and more.', icon: IconTransform, color: 'cyan' },
   { id: 'generate', label: 'Generators & Text', desc: 'IDs, QR codes, placeholder text and text utilities.', icon: IconLetterA, color: 'teal' },
   { id: 'security', label: 'Security', desc: 'Crypto, hashing, JWTs, certificates and analysis — offline.', icon: IconShieldLock, color: 'red' },
+  { id: 'cyber', label: 'Cyber & Blue Team', desc: 'CVSS scoring, IOC extraction, port risk reference and disclosure policy.', icon: IconTargetArrow, color: 'grape' },
   { id: 'network', label: 'Network & Web', desc: 'DNS, subnets and web security checks.', icon: IconNetwork, color: 'orange' },
 ];
 
@@ -61,6 +64,18 @@ export const TOOLS = [
     keywords: ['regex', 'regexp', 'regular expression', 'match', 'replace', 'pattern'] },
 
   // ── Encoders & Converters ──
+  { id: 'encoder-hub', label: 'Encoder / Decoder Hub', category: 'convert', icon: IconArrowsShuffle, isNew: true,
+    desc: '40+ encodings side by side — Base16/32/36/45/58/62/64/85/91, hex, binary, octal, URL, HTML, Unicode, quoted-printable, punycode, UUencode, Morse, Braille, NATO and more.',
+    keywords: ['encode', 'decode', 'base64', 'base32', 'base58', 'base62', 'base85', 'ascii85', 'base91', 'base45', 'hex', 'binary', 'octal', 'punycode', 'uuencode', 'quoted printable', 'morse', 'braille', 'nato', 'rot13', 'converter'] },
+  { id: 'magic-decoder', label: 'Magic Decoder', category: 'convert', icon: IconWand, isNew: true,
+    desc: 'Auto-detect and peel multi-layer encodings (Base64 → Hex → ROT13…) and rank the most readable result.',
+    keywords: ['magic', 'auto', 'detect', 'decode', 'ctf', 'cyberchef', 'unknown', 'layers', 'recursive'] },
+  { id: 'compression-tool', label: 'Gzip / Deflate', category: 'convert', icon: IconFileZip, isNew: true,
+    desc: 'Compress or decompress gzip, zlib and raw deflate — text, Base64, hex or files.',
+    keywords: ['gzip', 'gunzip', 'deflate', 'zlib', 'inflate', 'compress', 'decompress', 'gz'] },
+  { id: 'chmod-calculator', label: 'Chmod Calculator', category: 'convert', icon: IconFolderCog, isNew: true,
+    desc: 'Unix permissions octal ⇄ symbolic, SUID/SGID/sticky bits and risky-permission warnings.',
+    keywords: ['chmod', 'permissions', 'unix', 'linux', 'octal', 'rwx', 'suid', 'sgid', 'sticky', 'umask'] },
   { id: 'base64-tool', label: 'Base64', category: 'convert', icon: IconLock,
     desc: 'Encode / decode Base64 and Base64URL text, and convert files to data URIs and back.',
     keywords: ['base64', 'encode', 'decode', 'data uri', 'base64url'] },
@@ -137,9 +152,32 @@ export const TOOLS = [
   { id: 'subdomain-finder', label: 'Subdomain Finder', category: 'security', icon: IconSitemap, isNew: true,
     desc: 'Discover subdomains from Certificate Transparency logs, check which are live and flag dangling CNAMEs.',
     keywords: ['subdomain', 'certificate transparency', 'crt.sh', 'ct logs', 'attack surface', 'recon', 'takeover', 'dns'] },
+  { id: 'hash-identifier', label: 'Hash Identifier', category: 'security', icon: IconFingerprint, isNew: true,
+    desc: 'Identify 80+ hash formats (bcrypt, sha512crypt, NTLM, Argon2, Kerberos, MySQL…) with hashcat / John modes; decodes Cisco type 7.',
+    keywords: ['hash', 'identify', 'hashid', 'hashcat', 'john', 'bcrypt', 'ntlm', 'md5', 'sha', 'shadow', 'cisco', 'type 7'] },
+  { id: 'unicode-inspector', label: 'Unicode Inspector', category: 'security', icon: IconTextScan2, isNew: true,
+    desc: 'Find invisible characters, bidi overrides (Trojan Source), homoglyphs and mixed scripts — then sanitize.',
+    keywords: ['unicode', 'zero width', 'invisible', 'homoglyph', 'bidi', 'trojan source', 'spoof', 'confusable', 'sanitize'] },
+  { id: 'steganography', label: 'Image Steganography', category: 'security', icon: IconPhotoScan, isNew: true,
+    desc: 'Hide (optionally AES-encrypted) text inside PNG pixels, extract it again and view the LSB bit plane.',
+    keywords: ['steganography', 'stego', 'lsb', 'hide', 'image', 'secret', 'ctf', 'png'] },
   { id: 'security-headers', label: 'Security Headers', category: 'security', icon: IconShieldHalf, isNew: true,
     desc: 'Grade HTTP response headers and evaluate Content-Security-Policy.',
     keywords: ['headers', 'csp', 'hsts', 'security', 'content security policy', 'x-frame-options', 'cors'] },
+
+  // ── Cyber & Blue Team ──
+  { id: 'cvss-calculator', label: 'CVSS 3.1 Calculator', category: 'cyber', icon: IconGauge, isNew: true,
+    desc: 'Score vulnerabilities with CVSS v3.1, parse vectors and use presets for common findings — for VAPT reports.',
+    keywords: ['cvss', 'score', 'severity', 'vulnerability', 'vapt', 'pentest', 'report', 'cve', 'risk'] },
+  { id: 'ioc-extractor', label: 'IOC Extractor', category: 'cyber', icon: IconRadar, isNew: true,
+    desc: 'Pull IPs, domains, URLs, hashes, CVEs, ATT&CK IDs and more out of logs; refang / defang and export CSV.',
+    keywords: ['ioc', 'indicator', 'threat intel', 'defang', 'refang', 'soc', 'incident', 'extract', 'mitre', 'cti'] },
+  { id: 'port-reference', label: 'Port Risk Reference', category: 'cyber', icon: IconPlug, isNew: true,
+    desc: 'Common ports and services with internet-exposure risk and hardening notes.',
+    keywords: ['port', 'ports', 'service', 'firewall', 'nmap', 'tcp', 'udp', 'exposure', 'hardening'] },
+  { id: 'security-txt', label: 'security.txt Generator', category: 'cyber', icon: IconFileCertificate, isNew: true,
+    desc: 'Build and validate an RFC 9116 security.txt vulnerability-disclosure file.',
+    keywords: ['security.txt', 'rfc 9116', 'disclosure', 'bug bounty', 'vdp', 'well-known'] },
 
   // ── Network & Web ──
   { id: 'dns-lookup', label: 'DNS & Email Security', category: 'network', icon: IconAt, isNew: true,

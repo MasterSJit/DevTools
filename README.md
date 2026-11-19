@@ -1,6 +1,6 @@
 # DevForge — Developer & Security Tools
 
-**40 developer and cybersecurity tools that run in your browser.**
+**52 developer and cybersecurity tools that run in your browser.**
 Format code, decode tokens, hash files, generate keys, inspect certificates, audit security headers, check SEO and more — your data stays in the tab.
 
 Live: **https://dev-tools.serversbay.com**
@@ -10,7 +10,7 @@ Live: **https://dev-tools.serversbay.com**
 ## Highlights
 
 - **Privacy first** — almost every tool works offline with Web Crypto, WebAssembly and Web Workers. The few that must touch the network say so in the UI (see [Tools & privacy](docs/TOOLS.md#what-leaves-your-browser)).
-- **40 tools in 6 categories** — studios, code & formatters, encoders & converters, generators, security, network & web.
+- **52 tools in 7 categories** — studios, code & formatters, encoders & converters, generators, security, cyber & blue team, network & web.
 - **Security tools with fixes** — every finding links to a step-by-step *How to fix* guide with ready-to-copy config for Nginx, Apache, Cloudflare, Node.js, Laravel/PHP and Next.js.
 - **Fast UI** — ⌘K / `/` search, favorites, recently used, dark/light/system theme, side-by-side or stacked layouts, every tool code-split.
 - **Static hosting** — exports to plain HTML/JS (`out/`) for Apache or any static host. An optional Cloudflare Worker adds the features browsers can't do alone (reading another site's headers/HTML, legacy WHOIS).
@@ -87,7 +87,7 @@ src/
     layout/             Sidebar, Header, MainLayout
     tools/[tool]/       Static params, metadata, ToolRenderer (lazy loads tools), alias redirects
   constants/tools.js    Single registry of every tool (sidebar, search, home, sitemap read it)
-  features/             One folder per tool: code-tools, image-tools, security-tools, network-tools
+  features/             One folder per tool: code-tools, image-tools, security-tools, cyber-tools, network-tools
   shared/
     components/         UI building blocks (Panel, InputArea, FindingList, FixGuides, CodeEditor…)
     lib/                Encoding, crypto, ASN.1, IP, RDAP, CT logs, proxy client, fix guides…

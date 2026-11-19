@@ -34,6 +34,10 @@ All 40 tools live at `/tools/<id>/`. Unless a tool is listed under [What leaves 
 | Timestamp Converter | `/tools/timestamp-converter/` | Auto-detects s/ms/µs/ns, every IANA time zone, ISO 8601, RFC 2822, SQL, Windows FILETIME, relative time. |
 | Color Converter | `/tools/color-converter/` | HEX/RGB/HSL/HSV/CMYK/OKLCH/LAB, palettes, tints & shades, WCAG contrast checker. |
 | Cron Parser | `/tools/cron-parser/` | Plain-English description, 5 or 6 fields, macros (`@daily`), next runs in any time zone. |
+| Encoder / Decoder Hub | `/tools/encoder-hub/` | 39 encodings shown side by side in both directions: Base64/URL, Base32, Base36, Base45, Base58, Base62, Ascii85, Z85, Base91, hex, `\x` hex, binary, octal, decimal, char codes, UTF-16, URL, HTML entities, Unicode escapes, quoted-printable, punycode, UUencode, ROT13/18/47, Atbash, Morse, Baconian, tap code, A1Z26, NATO, Braille, leetspeak. |
+| Magic Decoder | `/tools/magic-decoder/` | Recursively detects and peels layered encodings (e.g. Base64 → Hex → ROT13) and ranks results by how readable they are. |
+| Gzip / Deflate | `/tools/compression-tool/` | gzip, zlib and raw deflate via the native CompressionStream; text/Base64/hex in and out, auto-detects by magic bytes, file compress/decompress. |
+| Chmod Calculator | `/tools/chmod-calculator/` | Octal ⇄ symbolic, SUID/SGID/sticky, chmod commands, warnings for world-writable and SUID. |
 
 ## Generators & Text
 
@@ -104,3 +108,15 @@ These need raw sockets or server infrastructure and are intentionally not includ
 - City-level IP geolocation (needs a GeoIP database or paid API)
 - Uptime monitoring and screenshots (possible later with Worker Cron Triggers / Browser Rendering)
 - VirusTotal file upload and e-mail breach lookups (need API keys)
+
+## New security & cyber tools
+
+| Tool | URL | Features |
+|---|---|---|
+| Hash Identifier | `/tools/hash-identifier/` | Detects 80+ formats (crypt `$1$/$5$/$6$/$y$`, bcrypt, Argon2, NTLM, NetNTLM, Kerberos, MySQL, MSSQL, PostgreSQL, phpass, Django…) with hashcat and John modes. Decodes reversible Cisco type 7 strings. |
+| Unicode Inspector | `/tools/unicode-inspector/` | Finds zero-width/tag characters, bidi overrides (Trojan Source), homoglyphs, mixed scripts and odd spaces; shows the hidden characters and gives a sanitized copy. |
+| Image Steganography | `/tools/steganography/` | Hides text in PNG pixel LSBs (1 or 2 bits per channel) with optional AES-256-GCM, extracts it again, and shows the LSB bit plane. |
+| CVSS 3.1 Calculator | `/tools/cvss-calculator/` | FIRST v3.1 base score, vector parse/copy, presets for common web findings. |
+| IOC Extractor | `/tools/ioc-extractor/` | Finds URLs, domains, IPv4/IPv6, emails, MD5/SHA hashes, CVEs, ATT&CK IDs, BTC addresses, Windows paths and registry keys; refang/defang; CSV export. |
+| Port Risk Reference | `/tools/port-reference/` | 64 common ports with internet-exposure risk and hardening notes. |
+| security.txt Generator | `/tools/security-txt/` | RFC 9116 builder with validation. |
