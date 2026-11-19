@@ -43,7 +43,7 @@ function Parser() {
   const parsed = useMemo(() => { try { return new URL(url.trim()); } catch { return null; } }, [url]);
   const [params, setParams] = useState(null);
 
-  const rows = params ?? (parsed ? [...parsed.searchParams] : []);
+  const rows = useMemo(() => params ?? (parsed ? [...parsed.searchParams] : []), [params, parsed]);
   const rebuilt = useMemo(() => {
     if (!parsed) return '';
     const u = new URL(parsed.href);

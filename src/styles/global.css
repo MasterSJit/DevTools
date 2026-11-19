@@ -12,7 +12,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   background-color: var(--df-bg-main);
   color: var(--df-text-main);
@@ -22,11 +22,11 @@ body {
 
 /* Monospace font only for actual code editors, outputs, and inputs */
 code, pre, kbd, .mantine-Code-root, .monaco-editor, .code-font {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', 'Fira Code', monospace !important;
 }
 
 .code-font textarea, textarea.code-font, .code-font input {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', 'Fira Code', monospace !important;
   font-size: 13px;
   line-height: 1.6;
 }

@@ -179,7 +179,7 @@ export default function WhoisLookup() {
             <Button size="compact-xs" variant="subtle" onClick={() => setShowRaw((v) => !v)}>{showRaw ? 'Hide' : 'Show'}</Button>
             <CopyButton value={JSON.stringify(result.data, null, 2)} icon />
           </>}>
-            <Text size="xs" c="dimmed">Source: <Anchor size="xs" href={result.url} target="_blank" rel="noopener noreferrer">{result.url}</Anchor></Text>
+            <Text size="xs" c="dimmed">Source: <Anchor size="xs" href={/^https?:\/\//i.test(result.url) ? result.url : undefined} target="_blank" rel="noopener noreferrer">{result.url}</Anchor></Text>
             <Collapse in={showRaw}>
               <Code block mt="xs" style={{ maxHeight: 480, overflow: 'auto' }}>{JSON.stringify(result.data, null, 2)}</Code>
             </Collapse>

@@ -6,8 +6,8 @@ import { Notifications } from '@mantine/notifications';
 import { useResolvedScheme } from '@/shared/hooks/useResolvedScheme';
 
 const theme = createTheme({
-  fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-  fontFamilyMonospace: "'JetBrains Mono', 'Fira Code', monospace",
+  fontFamily: "'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif",
+  fontFamilyMonospace: "'JetBrains Mono Variable', 'JetBrains Mono', 'Fira Code', monospace",
   primaryColor: 'indigo',
   defaultRadius: 'md',
   cursorType: 'pointer',

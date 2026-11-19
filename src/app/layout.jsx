@@ -1,5 +1,8 @@
 import Providers from './providers';
 import MainLayout from './layout/MainLayout';
+// Fonts are bundled from npm (Fontsource) — self-hosted, no request to Google, no network needed at build time.
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dropzone/styles.css';
@@ -27,11 +30,6 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body>
         <Providers>

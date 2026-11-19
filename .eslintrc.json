@@ -1,0 +1,7 @@
+{
+  "extends": "next/core-web-vitals",
+  "ignorePatterns": ["public/monaco/**", "out/**", "proxy/**", "test.jsx"],
+  "rules": {
+    "@next/next/no-img-element": "off"
+  }
+}

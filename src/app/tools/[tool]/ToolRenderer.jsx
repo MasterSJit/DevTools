@@ -33,11 +33,14 @@ const LOADERS = {
   'magic-decoder':       lazy(() => import('@/features/code-tools/magic-decoder/MagicDecoder')),
   'compression-tool':    lazy(() => import('@/features/code-tools/compression-tool/CompressionTool')),
   'chmod-calculator':    lazy(() => import('@/features/code-tools/chmod-calculator/ChmodCalculator')),
+  'json-csv':            lazy(() => import('@/features/code-tools/json-csv/JsonCsv')),
 
   'uuid-generator':      lazy(() => import('@/features/code-tools/uuid-generator/UuidGenerator')),
   'qr-generator':        lazy(() => import('@/features/code-tools/qr-generator/QrGenerator')),
   'text-tools':          lazy(() => import('@/features/code-tools/text-tools/TextTools')),
   'lorem-generator':     lazy(() => import('@/features/code-tools/lorem-generator/LoremGenerator')),
+  'favicon-generator':   lazy(() => import('@/features/image-tools/favicon-generator/FaviconGenerator')),
+  'color-palette':       lazy(() => import('@/features/image-tools/color-palette/ColorPalette')),
 
   'password-tools':      lazy(() => import('@/features/security-tools/password-tools/PasswordTools')),
   'hash-generator':      lazy(() => import('@/features/code-tools/hash-generator/HashGenerator')),
@@ -60,6 +63,12 @@ const LOADERS = {
   'port-reference':      lazy(() => import('@/features/cyber-tools/port-reference/PortReference')),
   'security-txt':        lazy(() => import('@/features/cyber-tools/security-txt/SecurityTxt')),
   'security-headers':    lazy(() => import('@/features/security-tools/security-headers/SecurityHeaders')),
+  'csp-builder':         lazy(() => import('@/features/security-tools/csp-builder/CspBuilder')),
+  'sri-generator':       lazy(() => import('@/features/security-tools/sri-generator/SriGenerator')),
+  'htpasswd-generator':  lazy(() => import('@/features/security-tools/htpasswd-generator/HtpasswdGenerator')),
+  'email-header-analyzer': lazy(() => import('@/features/cyber-tools/email-header-analyzer/EmailHeaderAnalyzer')),
+  'log-analyzer':        lazy(() => import('@/features/cyber-tools/log-analyzer/LogAnalyzer')),
+  'firewall-generator':  lazy(() => import('@/features/cyber-tools/firewall-generator/FirewallGenerator')),
   'whois-lookup':        lazy(() => import('@/features/network-tools/whois-lookup/WhoisLookup')),
   'seo-analyzer':        lazy(() => import('@/features/network-tools/seo-analyzer/SeoAnalyzer')),
 

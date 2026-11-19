@@ -6,7 +6,7 @@ All 40 tools live at `/tools/<id>/`. Unless a tool is listed under [What leaves 
 
 | Tool | URL | Features |
 |---|---|---|
-| Image Studio | `/tools/image-studio/` | Pipeline editor with undo/redo: compress (MozJPEG, OxiPNG, WebP, AVIF via WASM codecs), resize, crop, rotate/flip, filters, convert, text watermark, AI background removal. Paste an image with ⌘/Ctrl+V. |
+| Image Studio | `/tools/image-studio/` | Squoosh-style editor. Google Squoosh codecs (MozJPEG, WebP, AVIF, OxiPNG + palette reduction) and Squoosh resize (Lanczos3, Mitchell, Catmull-Rom, Magic Kernel, hqx) run in a Web Worker with live re-encoding. Before/after split compare, zoom & pan, interactive crop with aspect presets, rotate/flip/straighten, 11 adjustments + presets, text watermark, AI background removal, non-destructive undo/redo. **Batch mode** compresses up to 200 images and downloads a ZIP. Strips EXIF/GPS on export and warns if the original contains a location. |
 | JSON Studio | `/tools/json-studio/` | Beautify, minify, fix/repair (comments, trailing commas, single quotes, unquoted keys, Python literals, missing commas, JSONP wrappers), validate with JSON Schema (Ajv), sort keys, JSONPath query, convert to CSV / YAML / TypeScript / escaped string, CSV → JSON. |
 
 ## Code & Formatters
@@ -38,6 +38,7 @@ All 40 tools live at `/tools/<id>/`. Unless a tool is listed under [What leaves 
 | Magic Decoder | `/tools/magic-decoder/` | Recursively detects and peels layered encodings (e.g. Base64 → Hex → ROT13) and ranks results by how readable they are. |
 | Gzip / Deflate | `/tools/compression-tool/` | gzip, zlib and raw deflate via the native CompressionStream; text/Base64/hex in and out, auto-detects by magic bytes, file compress/decompress. |
 | Chmod Calculator | `/tools/chmod-calculator/` | Octal ⇄ symbolic, SUID/SGID/sticky, chmod commands, warnings for world-writable and SUID. |
+| JSON ⇄ CSV | `/tools/json-csv/` | RFC 4180 parser, delimiter auto-detect, nested objects flattened to `a.b.c` (and back), number/boolean detection, CSV formula-injection protection, table preview. |
 
 ## Generators & Text
 
@@ -47,6 +48,8 @@ All 40 tools live at `/tools/<id>/`. Unless a tool is listed under [What leaves 
 | QR Code Generator | `/tools/qr-generator/` | Text/URL, Wi-Fi, e-mail, SMS, phone, vCard; colors, error correction, PNG/SVG. Scan QR from an image (BarcodeDetector, Chromium browsers). |
 | Text Utilities | `/tools/text-tools/` | 12 case styles incl. slugify, line sort/dedupe/shuffle/number, clean-up, stats and word frequency. |
 | Lorem Ipsum | `/tools/lorem-generator/` | Paragraphs, sentences, words or list items as plain text, HTML or Markdown; large output and fullscreen view. |
+| Favicon Generator | `/tools/favicon-generator/` | From a logo or letter/emoji: favicon.ico (16/32/48), Apple touch, Android/PWA, maskable icon, site.webmanifest and `<head>` snippet as a ZIP. |
+| Image Colour Palette | `/tools/color-palette/` | k-means dominant colours with share %, HEX/RGB/HSL, export as CSS variables, Tailwind, SCSS or JSON. |
 
 ## Security
 
@@ -120,3 +123,9 @@ These need raw sockets or server infrastructure and are intentionally not includ
 | IOC Extractor | `/tools/ioc-extractor/` | Finds URLs, domains, IPv4/IPv6, emails, MD5/SHA hashes, CVEs, ATT&CK IDs, BTC addresses, Windows paths and registry keys; refang/defang; CSV export. |
 | Port Risk Reference | `/tools/port-reference/` | 64 common ports with internet-exposure risk and hardening notes. |
 | security.txt Generator | `/tools/security-txt/` | RFC 9116 builder with validation. |
+| CSP Builder & Evaluator | `/tools/csp-builder/` | Build a Content-Security-Policy from presets or grade a pasted one: unsafe-inline/eval, wildcards, JSONP bypass hosts, missing object-src/base-uri/frame-ancestors. Outputs header, Nginx, Apache and `<meta>`. |
+| SRI Hash Generator | `/tools/sri-generator/` | SHA-256/384/512 integrity values for pasted content or files, ready `<script>`/`<link>` tags, and a verifier. |
+| htpasswd Generator | `/tools/htpasswd-generator/` | bcrypt (`$2y$`), APR1-MD5 (identical to `openssl passwd -apr1`) and SHA-1 entries for several users, Apache/Nginx config, line verifier. |
+| Email Header Analyzer | `/tools/email-header-analyzer/` | Delivery path with per-hop delays and TLS, SPF/DKIM/DMARC results, Reply-To / display-name / look-alike spoofing checks. |
+| Web Log Attack Analyzer | `/tools/log-analyzer/` | Apache/Nginx combined logs: SQLi, XSS, traversal/LFI, RCE & Log4Shell, sensitive-file probes, scanner user-agents, login brute force; per-IP summary and block lists for Nginx, Apache, iptables, UFW and fail2ban. |
+| Firewall Rule Generator | `/tools/firewall-generator/` | Default-deny UFW, iptables (v4/v6) or nftables scripts with per-service source CIDRs, SSH rate-limiting, ICMP and IP block lists. |

@@ -114,7 +114,7 @@ function Base64ToFile() {
             <Badge variant="light" color="gray">{formatBytes(decoded.bytes.length)}</Badge>
             <Badge variant="outline" color="gray" tt="none">{decoded.mime}</Badge>
           </Group>
-          {decoded.mime.startsWith('image/') && <Image src={decoded.url} mah={300} fit="contain" radius="md" className="df-checker" />}
+          {decoded.mime.startsWith('image/') && <Image src={decoded.url} alt="Decoded image" mah={300} fit="contain" radius="md" className="df-checker" />}
           {!decoded.mime.startsWith('image/') && (
             <Textarea readOnly value={tryUtf8(decoded.bytes) ?? hexdump(decoded.bytes.subarray(0, 512))} autosize minRows={4} maxRows={12} className="code-font" />
           )}

@@ -4,6 +4,8 @@ const isStaticExport = process.env.STATIC_EXPORT === '1';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   ...(isStaticExport && {
     output: 'export',
     // /tools/foo/ → out/tools/foo/index.html, which Apache serves without rewrites
@@ -14,7 +16,9 @@ const nextConfig = {
   webpack(config, { isServer }) {
     // Some formatter plugins (e.g. @prettier/plugin-php) reference Node built-ins they never use in the browser.
     if (!isServer) {
-      config.resolve.fallback = { ...config.resolve.fallback, fs: false, path: false, module: false, url: false };
+      // `crypto: false` stops webpack bundling crypto-browserify (~100 KB) for libraries like bcryptjs that
+      // only probe for Node's crypto and fall back to Web Crypto's getRandomValues.
+      config.resolve.fallback = { ...config.resolve.fallback, fs: false, path: false, module: false, url: false, crypto: false, stream: false };
     }
 
     // ─── WASM support for @jsquash/* codec packages ───────────────────────────

@@ -9,8 +9,9 @@ import { useDebounce } from '@/shared/hooks/useDebounce';
 import { useResolvedScheme } from '@/shared/hooks/useResolvedScheme';
 import { useViewStore } from '@/shared/stores/view.store';
 import { downloadText } from '@/shared/lib/download';
+import { loadMonaco } from '@/shared/lib/monaco';
 
-const DiffEditor = lazy(() => import('@monaco-editor/react').then((m) => ({ default: m.DiffEditor })));
+const DiffEditor = lazy(() => loadMonaco().then((m) => ({ default: m.DiffEditor })));
 
 const LANGS = ['plaintext', 'javascript', 'typescript', 'json', 'html', 'css', 'python', 'java', 'go', 'rust', 'php', 'sql', 'yaml', 'xml', 'markdown', 'shell'];
 

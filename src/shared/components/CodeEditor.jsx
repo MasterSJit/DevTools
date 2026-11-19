@@ -5,8 +5,9 @@ import { Loader, Center, ActionIcon, Tooltip } from '@mantine/core';
 import { IconMaximize, IconMinimize } from '@tabler/icons-react';
 import { createPortal } from 'react-dom';
 import { useResolvedScheme } from '@/shared/hooks/useResolvedScheme';
+import { loadMonaco } from '@/shared/lib/monaco';
 
-const MonacoEditor = lazy(() => import('@monaco-editor/react'));
+const MonacoEditor = lazy(loadMonaco);
 
 export default function CodeEditor({
   value, onChange, language = 'plaintext', height = '350px',
@@ -32,7 +33,7 @@ export default function CodeEditor({
     minimap: { enabled: fullscreen ? true : minimap },
     wordWrap,
     fontSize: fullscreen ? 15 : fontSize,
-    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+    fontFamily: "'JetBrains Mono Variable', 'JetBrains Mono', 'Fira Code', monospace",
     scrollBeyondLastLine: false,
     lineNumbersMinChars: 3,
     padding: { top: 10 },

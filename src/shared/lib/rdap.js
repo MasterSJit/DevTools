@@ -94,7 +94,8 @@ export async function rdapLookup(query) {
 
 /** Follows the registrar's own RDAP record (thin registries like .com keep contacts there). Best effort. */
 export async function rdapRelated(data) {
-  const link = (data.links || []).find((l) => l.rel === 'related' && /application\/rdap\+json/.test(l.type || '') && l.href);
+  // Only follow https:// referrals — the href comes from a remote server's JSON.
+  const link = (data.links || []).find((l) => l.rel === 'related' && /application\/rdap\+json/.test(l.type || '') && /^https:\/\//i.test(l.href || ''));
   if (!link) return null;
   try {
     const res = await fetch(link.href, { headers: { accept: 'application/rdap+json' }, signal: AbortSignal.timeout(8000) });

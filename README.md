@@ -1,6 +1,6 @@
 # DevForge — Developer & Security Tools
 
-**52 developer and cybersecurity tools that run in your browser.**
+**60 developer and cybersecurity tools that run in your browser.**
 Format code, decode tokens, hash files, generate keys, inspect certificates, audit security headers, check SEO and more — your data stays in the tab.
 
 Live: **https://dev-tools.serversbay.com**
@@ -10,7 +10,7 @@ Live: **https://dev-tools.serversbay.com**
 ## Highlights
 
 - **Privacy first** — almost every tool works offline with Web Crypto, WebAssembly and Web Workers. The few that must touch the network say so in the UI (see [Tools & privacy](docs/TOOLS.md#what-leaves-your-browser)).
-- **52 tools in 7 categories** — studios, code & formatters, encoders & converters, generators, security, cyber & blue team, network & web.
+- **60 tools in 7 categories** — studios, code & formatters, encoders & converters, generators, security, cyber & blue team, network & web.
 - **Security tools with fixes** — every finding links to a step-by-step *How to fix* guide with ready-to-copy config for Nginx, Apache, Cloudflare, Node.js, Laravel/PHP and Next.js.
 - **Fast UI** — ⌘K / `/` search, favorites, recently used, dark/light/system theme, side-by-side or stacked layouts, every tool code-split.
 - **Static hosting** — exports to plain HTML/JS (`out/`) for Apache or any static host. An optional Cloudflare Worker adds the features browsers can't do alone (reading another site's headers/HTML, legacy WHOIS).
@@ -21,9 +21,10 @@ Live: **https://dev-tools.serversbay.com**
 |---|---|
 | **Studios** | Image Studio · JSON Studio |
 | **Code & Formatters** | Code Formatter & Minifier (26 languages) · JS Linter · HTML Tools · SQL Formatter · XML Tools · YAML Tools · Markdown Editor · Diff Viewer · Regex Tester |
-| **Encoders & Converters** | Base64 · URL Encoder · String Escaper · Number Base Converter · Timestamp Converter · Color Converter · Cron Parser |
-| **Generators & Text** | UUID / ID Generator · QR Code Generator · Text Utilities · Lorem Ipsum |
-| **Security** | Password Generator · Hash Generator · Bcrypt & PBKDF2 · JWT Debugger · Encrypt / Decrypt (AES-GCM) · Key Pair Generator · Certificate Decoder · Cipher Lab · TOTP / 2FA · File Inspector · EXIF / Metadata · URL Analyzer · Subdomain Finder · Security Headers |
+| **Encoders & Converters** | Encoder / Decoder Hub · Magic Decoder · Gzip / Deflate · Chmod Calculator · JSON ⇄ CSV · Base64 · URL Encoder · String Escaper · Number Base Converter · Timestamp Converter · Color Converter · Cron Parser |
+| **Generators & Text** | UUID / ID Generator · QR Code Generator · Text Utilities · Lorem Ipsum · Favicon Generator · Image Colour Palette |
+| **Security** | Password Generator · Hash Generator · Bcrypt & PBKDF2 · JWT Debugger · Encrypt / Decrypt (AES-GCM) · Key Pair Generator · Certificate Decoder · Cipher Lab · TOTP / 2FA · File Inspector · EXIF / Metadata · URL Analyzer · Subdomain Finder · Hash Identifier · Unicode Inspector · Image Steganography · Security Headers · CSP Builder & Evaluator · SRI Hash Generator · htpasswd Generator |
+| **Cyber & Blue Team** | CVSS 3.1 Calculator · IOC Extractor · Port Risk Reference · security.txt Generator · Email Header Analyzer · Web Log Attack Analyzer · Firewall Rule Generator |
 | **Network & Web** | DNS & Email Security · SEO & Performance · WHOIS / RDAP Lookup · Subnet Calculator |
 
 Full descriptions, URLs and network behaviour per tool: **[docs/TOOLS.md](docs/TOOLS.md)**.
@@ -94,7 +95,8 @@ src/
     stores/             Zustand stores (theme, favorites, history, layout, preferences)
     workers/            Web Workers (diff, image)
 proxy/                  Cloudflare Worker (headers/HTML inspection, port-43 WHOIS)
-public/.htaccess        Apache config shipped inside out/
+public/.htaccess        Apache config shipped inside out/ (security headers, CSP, blocks dotfiles)
+scripts/                copy-monaco.mjs (self-hosts the editor) · harden-static.mjs (per-page hashed CSP)
 .github/workflows/      Static build → deploy branch
 ```
 
@@ -112,3 +114,11 @@ Next.js 14 (app router, static export) · React 18 · Mantine 7 · Tailwind CSS 
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Code layout, registry & routing, shared libraries, gotchas, adding a tool |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Enhance + GitHub Actions, Apache, Cloudflare, Worker, troubleshooting |
 | [proxy/README.md](proxy/README.md) | The proxy Worker's endpoints, safety limits and deploy commands |
+
+## Security hardening
+
+- **Strict Content-Security-Policy.** `npm run build:static` runs `scripts/harden-static.mjs`, which hashes every inline script in every exported page and adds a per-page `<meta>` CSP allowing only those scripts and same-origin files. `.htaccess` adds a header CSP for everything else (`object-src 'none'`, `frame-ancestors 'none'`, `base-uri`, `form-action`). Injected `<script>`, inline event handlers and third-party scripts are blocked even if a tool had an XSS bug.
+- **No third-party code at runtime.** Monaco is copied to `public/monaco` at build time (`scripts/copy-monaco.mjs`) and fonts are self-hosted by `next/font`. The only external downloads are the opt-in network tools listed in [docs/TOOLS.md](docs/TOOLS.md) and the background-removal model.
+- **Headers:** HSTS, `X-Frame-Options: DENY`, `nosniff`, COOP/COEP/CORP, a locked-down `Permissions-Policy`; dotfiles, backups and source maps return 403; only GET/HEAD/OPTIONS are accepted.
+- **Input safety:** CSV export neutralises spreadsheet formulas, JSON→object conversion blocks `__proto__` keys, remote links are restricted to `https://`, and uploads are size- and pixel-limited.
+

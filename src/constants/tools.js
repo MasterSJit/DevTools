@@ -8,6 +8,8 @@ import {
   IconLockSquareRounded, IconSpy, IconShieldHalf, IconAt, IconBug, IconWorldWww, IconSitemap, IconSeo,
   IconWand, IconArrowsShuffle, IconFileZip, IconFolderCog, IconFingerprint, IconTextScan2, IconPhotoScan,
   IconGauge, IconRadar, IconPlug, IconFileCertificate, IconTargetArrow,
+  IconTableExport, IconShieldCode, IconUserShield, IconShieldCheckered, IconMailSearch, IconFileAnalytics, IconWall,
+  IconAppWindow, IconColorSwatch,
 } from '@tabler/icons-react';
 
 /**
@@ -76,6 +78,9 @@ export const TOOLS = [
   { id: 'chmod-calculator', label: 'Chmod Calculator', category: 'convert', icon: IconFolderCog, isNew: true,
     desc: 'Unix permissions octal ⇄ symbolic, SUID/SGID/sticky bits and risky-permission warnings.',
     keywords: ['chmod', 'permissions', 'unix', 'linux', 'octal', 'rwx', 'suid', 'sgid', 'sticky', 'umask'] },
+  { id: 'json-csv', label: 'JSON ⇄ CSV', category: 'convert', icon: IconTableExport, isNew: true,
+    desc: 'Convert JSON arrays to CSV and back — nested objects, type detection and CSV-injection protection.',
+    keywords: ['json', 'csv', 'excel', 'spreadsheet', 'convert', 'tsv', 'table'] },
   { id: 'base64-tool', label: 'Base64', category: 'convert', icon: IconLock,
     desc: 'Encode / decode Base64 and Base64URL text, and convert files to data URIs and back.',
     keywords: ['base64', 'encode', 'decode', 'data uri', 'base64url'] },
@@ -111,6 +116,12 @@ export const TOOLS = [
   { id: 'lorem-generator', label: 'Lorem Ipsum', category: 'generate', icon: IconLetterA,
     desc: 'Placeholder paragraphs, sentences or words.',
     keywords: ['lorem', 'ipsum', 'placeholder', 'text', 'dummy'] },
+  { id: 'favicon-generator', label: 'Favicon Generator', category: 'generate', icon: IconAppWindow, isNew: true,
+    desc: 'favicon.ico, Apple touch, Android / PWA and maskable icons plus a web manifest from a logo or emoji.',
+    keywords: ['favicon', 'ico', 'icon', 'pwa', 'manifest', 'apple-touch-icon', 'logo'] },
+  { id: 'color-palette', label: 'Image Colour Palette', category: 'generate', icon: IconColorSwatch, isNew: true,
+    desc: 'Extract dominant colours from any image and export CSS variables, Tailwind or JSON.',
+    keywords: ['color', 'colour', 'palette', 'extract', 'dominant', 'image', 'tailwind', 'theme'] },
 
   // ── Security ──
   { id: 'password-tools', label: 'Password Generator', category: 'security', icon: IconPassword, isNew: true,
@@ -164,6 +175,15 @@ export const TOOLS = [
   { id: 'security-headers', label: 'Security Headers', category: 'security', icon: IconShieldHalf, isNew: true,
     desc: 'Grade HTTP response headers and evaluate Content-Security-Policy.',
     keywords: ['headers', 'csp', 'hsts', 'security', 'content security policy', 'x-frame-options', 'cors'] },
+  { id: 'csp-builder', label: 'CSP Builder & Evaluator', category: 'security', icon: IconShieldCheckered, isNew: true,
+    desc: 'Build a Content-Security-Policy or grade an existing one for XSS bypasses and missing directives.',
+    keywords: ['csp', 'content security policy', 'xss', 'header', 'nonce', 'strict-dynamic'] },
+  { id: 'sri-generator', label: 'SRI Hash Generator', category: 'security', icon: IconShieldCode, isNew: true,
+    desc: 'Subresource Integrity hashes and <script>/<link> tags so a compromised CDN cannot inject code.',
+    keywords: ['sri', 'subresource integrity', 'integrity', 'cdn', 'sha384', 'script'] },
+  { id: 'htpasswd-generator', label: 'htpasswd Generator', category: 'security', icon: IconUserShield, isNew: true,
+    desc: 'Apache / Nginx basic-auth files with bcrypt, APR1-MD5 or SHA-1 — plus a line verifier.',
+    keywords: ['htpasswd', 'basic auth', 'apache', 'nginx', 'bcrypt', 'apr1', 'password'] },
 
   // ── Cyber & Blue Team ──
   { id: 'cvss-calculator', label: 'CVSS 3.1 Calculator', category: 'cyber', icon: IconGauge, isNew: true,
@@ -178,6 +198,15 @@ export const TOOLS = [
   { id: 'security-txt', label: 'security.txt Generator', category: 'cyber', icon: IconFileCertificate, isNew: true,
     desc: 'Build and validate an RFC 9116 security.txt vulnerability-disclosure file.',
     keywords: ['security.txt', 'rfc 9116', 'disclosure', 'bug bounty', 'vdp', 'well-known'] },
+  { id: 'email-header-analyzer', label: 'Email Header Analyzer', category: 'cyber', icon: IconMailSearch, isNew: true,
+    desc: 'Trace the delivery path and spot spoofing: SPF / DKIM / DMARC results, Reply-To tricks, look-alike senders.',
+    keywords: ['email', 'header', 'phishing', 'spf', 'dkim', 'dmarc', 'received', 'spoof'] },
+  { id: 'log-analyzer', label: 'Web Log Attack Analyzer', category: 'cyber', icon: IconFileAnalytics, isNew: true,
+    desc: 'Find SQLi, XSS, traversal, Log4Shell, scanners and brute force in Apache / Nginx logs — export block lists.',
+    keywords: ['log', 'access log', 'nginx', 'apache', 'attack', 'sqli', 'xss', 'fail2ban', 'incident'] },
+  { id: 'firewall-generator', label: 'Firewall Rule Generator', category: 'cyber', icon: IconWall, isNew: true,
+    desc: 'Default-deny UFW, iptables or nftables rules with SSH rate-limiting and IP block lists.',
+    keywords: ['firewall', 'ufw', 'iptables', 'nftables', 'hardening', 'server', 'ssh'] },
 
   // ── Network & Web ──
   { id: 'dns-lookup', label: 'DNS & Email Security', category: 'network', icon: IconAt, isNew: true,
