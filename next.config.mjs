@@ -1,10 +1,14 @@
 // `npm run build:static` produces a fully static site in ./out (for Apache / any static host).
 // `npm run build` keeps the regular Next.js server build.
+import { fileURLToPath } from 'node:url';
+
 const isStaticExport = process.env.STATIC_EXPORT === '1';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  // Pin the project root (a stray lockfile in a parent folder confuses Next 15's workspace detection).
+  outputFileTracingRoot: fileURLToPath(new URL('.', import.meta.url)),
   productionBrowserSourceMaps: false,
   ...(isStaticExport && {
     output: 'export',

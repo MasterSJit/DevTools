@@ -8,6 +8,7 @@ import { Panel, Stat } from '@/shared/components/ui';
 import { ctSearch, hostnamesFromCerts } from '@/shared/lib/ct';
 import { downloadText } from '@/shared/lib/download';
 import FixGuides from '@/shared/components/FixGuides';
+import { assertAllowed } from '@/shared/lib/blocklist';
 
 // Names that usually deserve a second look when they are publicly discoverable
 const SENSITIVE = /(dev|stag|stg|test|uat|qa|sandbox|admin|internal|intranet|vpn|jenkins|gitlab|git|db|sql|backup|old|legacy|beta|debug|cpanel|whm|panel|grafana|kibana|jira|confluence)/i;
@@ -26,6 +27,7 @@ upload download vpn remote git gitlab jenkins ci monitor grafana db mysql phpmya
 crm erp intranet internal old new backup ftp sftp cloud analytics news events careers jobs pay billing partners`.split(/\s+/);
 
 async function resolve(name) {
+  assertAllowed(name);
   const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=A`, { headers: { accept: 'application/dns-json' } });
   const j = await res.json();
   const answers = j.Answer || [];
@@ -40,6 +42,7 @@ async function resolve(name) {
 const fingerprint = (r) => `${r.cname.join(',')}|${[...r.ips].sort().join(',')}`;
 
 async function dnsAnswers(name, type) {
+  assertAllowed(name);
   const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`, { headers: { accept: 'application/dns-json' } });
   return (await res.json()).Answer || [];
 }
@@ -62,7 +65,7 @@ async function harvestFromDns(d) {
 }
 
 export default function SubdomainFinder() {
-  const [domain, setDomain] = useState('serversbay.com');
+  const [domain, setDomain] = useState('example.com');
   const [source, setSource] = useState('auto');
   const [includeExpired, setIncludeExpired] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -102,6 +105,7 @@ export default function SubdomainFinder() {
     try {
       const d = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^\*\./, '').replace(/^www\./, '');
       if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(d)) throw new Error('Enter a registered domain like example.com');
+      assertAllowed(d); // fail fast instead of letting each CT / DNS lookup fail
       setStage('Searching Certificate Transparency logs…');
       const ct = await ctSearch(d, { source, subdomains: true, includeExpired }).catch((e) => ({ certs: [], source: '—', errors: [e.message] }));
       const hosts = hostnamesFromCerts(ct.certs, d);

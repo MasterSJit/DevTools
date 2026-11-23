@@ -20,8 +20,8 @@ const SAMPLE_A = `{
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "next": "^14.2.5",
-    "react": "^18.3.1"
+    "my-ui-kit": "^1.4.0",
+    "my-http-client": "^2.0.1"
   }
 }`;
 const SAMPLE_B = `{
@@ -29,9 +29,9 @@ const SAMPLE_B = `{
   "version": "2.0.0",
   "private": true,
   "dependencies": {
-    "acorn": "^8.14.0",
-    "next": "^14.2.35",
-    "react": "^18.3.1"
+    "my-date-utils": "^0.9.2",
+    "my-ui-kit": "^1.6.3",
+    "my-http-client": "^2.0.1"
   }
 }`;
 

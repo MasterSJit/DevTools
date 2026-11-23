@@ -25,7 +25,7 @@ const SAMPLE = `{
 const BROKEN_SAMPLE = `// copied from a config file
 {
   name: 'devforge',
-  "homepage": "https://dev-tools.serversbay.com", // URLs are safe now
+  "homepage": "https://example.com", // URLs are safe now
   "debug": True,
   "token": None,
   "features": ["json", "yaml",],

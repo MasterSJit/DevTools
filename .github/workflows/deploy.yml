@@ -29,6 +29,11 @@ jobs:
       - run: npm ci
 
       - run: npm run build:static
+        env:
+          # Set these in GitHub → Settings → Secrets and variables → Actions → Variables.
+          # The domain lives there, not in the code.
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
+          NEXT_PUBLIC_BLOCKED_DOMAINS: ${{ vars.BLOCKED_DOMAINS }}
 
       - name: Publish out/ to the deploy branch
         uses: peaceiris/actions-gh-pages@v4

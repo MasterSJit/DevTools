@@ -8,6 +8,7 @@ import { Panel, FindingList, KVTable } from '@/shared/components/ui';
 import { inspectUrl, normalizeUrl, ProxyUnavailableError } from '@/shared/lib/proxy';
 import { formatBytes } from '@/shared/lib/download';
 import { analyzeSeo, parseSitemap } from './seoChecks';
+import { assertAllowed } from '@/shared/lib/blocklist';
 
 const color = (s) => (s >= 90 ? 'teal' : s >= 70 ? 'lime' : s >= 50 ? 'orange' : 'red');
 const PSI_KEY = 'devforge-psi-key';
@@ -67,6 +68,7 @@ function Lighthouse({ url }) {
     setBusy(true); setError(null); setRes(null);
     try { localStorage.setItem(PSI_KEY, key); } catch {}
     try {
+      assertAllowed(url);
       const params = new URLSearchParams({ url, strategy });
       ['PERFORMANCE', 'SEO', 'ACCESSIBILITY', 'BEST_PRACTICES'].forEach((c) => params.append('category', c));
       if (key) params.set('key', key);
@@ -208,7 +210,7 @@ function Report({ r, url, response }) {
 }
 
 function UrlMode() {
-  const [url, setUrl] = useState('https://dev-tools.serversbay.com');
+  const [url, setUrl] = useState('https://example.com');
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState('');
   const [data, setData] = useState(null);

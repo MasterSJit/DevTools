@@ -3,7 +3,6 @@
 **60 developer and cybersecurity tools that run in your browser.**
 Format code, decode tokens, hash files, generate keys, inspect certificates, audit security headers, check SEO and more — your data stays in the tab.
 
-Live: **https://dev-tools.serversbay.com**
 
 ---
 
@@ -66,7 +65,9 @@ NEXT_PUBLIC_PROXY_URL=http://localhost:8787/api
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_PROXY_URL` | `/api` | Base URL of the proxy Worker. Production uses the same-origin route `dev-tools.serversbay.com/api/*`. |
+| `NEXT_PUBLIC_PROXY_URL` | `/api` | Base URL of the proxy Worker. Production uses the same-origin route `tools.example.com/api/*`. |
+| `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | Public URL of the site (sitemap, robots.txt, canonical/OG). CI reads it from the repo variable `SITE_URL`; the build fails in CI if it is missing. |
+| `NEXT_PUBLIC_BLOCKED_DOMAINS` | empty | Extra domains the network tools refuse to scan, comma-separated. The site's own domain (and parent domain) is always blocked at runtime. CI reads repo variable `BLOCKED_DOMAINS`. |
 | `STATIC_EXPORT` | unset | Set to `1` (done by `build:static`) for `output: 'export'` + trailing slashes. |
 
 ## Deployment
@@ -120,5 +121,7 @@ Next.js 14 (app router, static export) · React 18 · Mantine 7 · Tailwind CSS 
 - **Strict Content-Security-Policy.** `npm run build:static` runs `scripts/harden-static.mjs`, which hashes every inline script in every exported page and adds a per-page `<meta>` CSP allowing only those scripts and same-origin files. `.htaccess` adds a header CSP for everything else (`object-src 'none'`, `frame-ancestors 'none'`, `base-uri`, `form-action`). Injected `<script>`, inline event handlers and third-party scripts are blocked even if a tool had an XSS bug.
 - **No third-party code at runtime.** Monaco is copied to `public/monaco` at build time (`scripts/copy-monaco.mjs`) and fonts are self-hosted by `next/font`. The only external downloads are the opt-in network tools listed in [docs/TOOLS.md](docs/TOOLS.md) and the background-removal model.
 - **Headers:** HSTS, `X-Frame-Options: DENY`, `nosniff`, COOP/COEP/CORP, a locked-down `Permissions-Policy`; dotfiles, backups and source maps return 403; only GET/HEAD/OPTIONS are accepted.
+- **Never scans itself:** DNS, subdomain, header, SEO, WHOIS/RDAP and certificate lookups refuse the domain the site is served from (plus its parent domain and subdomains) and anything in `NEXT_PUBLIC_BLOCKED_DOMAINS`. The proxy Worker enforces the same rule server-side (`BLOCKED_DOMAINS` + its own host).
+- **No domain in the repo:** the site URL comes from `NEXT_PUBLIC_SITE_URL`; the Worker's real route lives in the gitignored `proxy/wrangler.production.toml`.
 - **Input safety:** CSV export neutralises spreadsheet formulas, JSON→object conversion blocks `__proto__` keys, remote links are restricted to `https://`, and uploads are size- and pixel-limited.
 

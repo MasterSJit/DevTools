@@ -1,6 +1,7 @@
 // RDAP (the JSON successor of WHOIS) straight from the browser.
 // IANA's bootstrap files and the registries' RDAP servers all send `Access-Control-Allow-Origin: *`.
 import { isIPv4, isIPv6, cidrContains } from './ip';
+import { assertAllowed } from '@/shared/lib/blocklist';
 
 const BOOTSTRAP = {
   dns: 'https://data.iana.org/rdap/dns.json',
@@ -65,6 +66,7 @@ async function serverFor(query) {
 }
 
 export async function rdapLookup(query) {
+  if (query.type === 'domain') assertAllowed(query.value);
   const server = await serverFor(query);
   if (!server.base) {
     const err = new Error(`.${server.zone} has no public RDAP service — it only offers legacy port-43 WHOIS.`);

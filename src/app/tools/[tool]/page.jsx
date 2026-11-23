@@ -10,9 +10,11 @@ export function generateStaticParams() {
   return [...TOOLS.map((t) => ({ tool: t.id })), ...Object.keys(TOOL_ALIASES).map((tool) => ({ tool }))];
 }
 
-export function generateMetadata({ params }) {
-  const tool = getTool(params.tool);
-  if (!tool) return TOOL_ALIASES[params.tool] ? { robots: { index: false } } : {};
+// Next 15: route params are a Promise.
+export async function generateMetadata({ params }) {
+  const { tool: id } = await params;
+  const tool = getTool(id);
+  if (!tool) return TOOL_ALIASES[id] ? { robots: { index: false } } : {};
   return {
     title: `${tool.label} — DevForge`,
     description: `${tool.desc} Runs 100% in your browser.`,
@@ -21,8 +23,9 @@ export function generateMetadata({ params }) {
   };
 }
 
-export default function ToolPage({ params }) {
-  if (TOOL_ALIASES[params.tool]) return <AliasRedirect to={TOOL_ALIASES[params.tool]} />;
-  if (!getTool(params.tool)) notFound();
-  return <ToolRenderer id={params.tool} />;
+export default async function ToolPage({ params }) {
+  const { tool: id } = await params;
+  if (TOOL_ALIASES[id]) return <AliasRedirect to={TOOL_ALIASES[id]} />;
+  if (!getTool(id)) notFound();
+  return <ToolRenderer id={id} />;
 }

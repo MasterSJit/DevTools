@@ -18,11 +18,17 @@ max 5 redirects, 10 s timeout, other websites' browsers are rejected by Origin, 
 cd proxy
 npm install
 npx wrangler login        # opens Cloudflare in the browser
-npx wrangler deploy       # creates the Worker and the route dev-tools.serversbay.com/api/*
+cp wrangler.toml wrangler.production.toml   # gitignored — add your real route + ALLOWED_ORIGINS here
+npm run deploy            # wrangler deploy --config wrangler.production.toml
 ```
 
-The route in `wrangler.toml` puts the Worker on the same domain as the site, so no CORS setup is needed.
-`dev-tools.serversbay.com` must be proxied through Cloudflare (orange cloud), which it already is.
+The route in `wrangler.production.toml` puts the Worker on the same domain as the site, so no CORS setup is needed.
+Your site's hostname must be proxied through Cloudflare (orange cloud). The committed `wrangler.toml` contains no real domain.
+
+### Blocked targets
+
+The Worker refuses to inspect or WHOIS the hostname it is served from, that hostname's parent domain and all subdomains,
+plus anything in the `BLOCKED_DOMAINS` variable (comma-separated). Redirects are checked on every hop.
 
 ## Local development
 

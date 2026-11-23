@@ -1,3 +1,4 @@
+import { assertAllowed } from '@/shared/lib/blocklist';
 // Certificate Transparency log search (crt.sh and SSLMate Cert Spotter) — both allow browser CORS requests.
 
 const utc = (s) => new Date(/Z|[+-]\d\d:?\d\d$/.test(s) ? s : `${s}Z`);
@@ -60,6 +61,7 @@ async function certspotter(domain, { subdomains, withDer, pages = 4 }) {
  * source: 'auto' tries crt.sh first and falls back to Cert Spotter when it is slow or down.
  */
 export async function ctSearch(domain, { source = 'auto', subdomains = true, includeExpired = false, withDer = false } = {}) {
+  assertAllowed(domain);
   const errors = [];
   const order = source === 'auto' ? ['crt.sh', 'certspotter'] : [source];
   for (const s of order) {

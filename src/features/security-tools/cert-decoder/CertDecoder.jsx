@@ -112,7 +112,7 @@ async function decodeDer(der, isCsr = false) {
 }
 
 function DomainLookup() {
-  const [domain, setDomain] = useState('dev-tools.serversbay.com');
+  const [domain, setDomain] = useState('example.com');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);

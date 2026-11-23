@@ -24,7 +24,7 @@ function buildPayload(type, f) {
 
 function Generator() {
   const [type, setType] = useState('text');
-  const [f, setF] = useState({ text: 'https://dev-tools.serversbay.com', ssid: '', password: '', security: 'WPA', hidden: false, email: '', subject: '', body: '', phone: '', first: '', last: '', org: '', url: '' });
+  const [f, setF] = useState({ text: 'https://example.com', ssid: '', password: '', security: 'WPA', hidden: false, email: '', subject: '', body: '', phone: '', first: '', last: '', org: '', url: '' });
   const [ecl, setEcl] = useState('M');
   const [size, setSize] = useState(320);
   const [dark, setDark] = useState('#0f172a');

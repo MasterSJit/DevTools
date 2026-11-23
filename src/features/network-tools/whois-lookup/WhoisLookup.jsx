@@ -9,7 +9,7 @@ import { classifyQuery, rdapLookup, rdapRelated, summarize, domainFindings, pret
 import { legacyWhois, ProxyUnavailableError } from '@/shared/lib/proxy';
 import FixGuides from '@/shared/components/FixGuides';
 
-const EXAMPLES = ['serversbay.com', 'google.dev', '8.8.8.8', '2606:4700:4700::1111', 'AS13335'];
+const EXAMPLES = ['example.com', 'google.dev', '8.8.8.8', '2606:4700:4700::1111', 'AS13335'];
 const TYPE_LABEL = { domain: 'Domain', ip: 'IP address', autnum: 'ASN' };
 
 const fmtDate = (d) => (d ? new Date(d).toUTCString().replace(' GMT', ' UTC') : '—');
@@ -95,7 +95,7 @@ function NetworkView({ s, type }) {
 }
 
 export default function WhoisLookup() {
-  const [input, setInput] = useState('serversbay.com');
+  const [input, setInput] = useState('example.com');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);

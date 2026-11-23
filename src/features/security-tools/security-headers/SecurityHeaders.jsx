@@ -4,6 +4,7 @@ import { IconShieldHalf, IconTerminal2, IconWorld } from '@tabler/icons-react';
 import { Panel, FindingList, Grade, PrivacyNote } from '@/shared/components/ui';
 import { inspectUrl, normalizeUrl, ProxyUnavailableError } from '@/shared/lib/proxy';
 import FixGuides from '@/shared/components/FixGuides';
+import { assertAllowed } from '@/shared/lib/blocklist';
 
 const SAMPLE = `HTTP/2 200
 content-type: text/html; charset=utf-8
@@ -245,7 +246,7 @@ async function browserAttempt(url) {
 }
 
 function UrlTab() {
-  const [url, setUrl] = useState('https://dev-tools.serversbay.com');
+  const [url, setUrl] = useState('https://example.com');
   const [busy, setBusy] = useState(false);
   const [browser, setBrowser] = useState(null);
   const [result, setResult] = useState(null);
@@ -256,7 +257,7 @@ function UrlTab() {
   const run = async () => {
     setBusy(true); setError(null); setResult(null); setBrowser(null); setRaw(''); setExtra([]);
     let target;
-    try { target = normalizeUrl(url); } catch (e) { setError(e.message); setBusy(false); return; }
+    try { target = normalizeUrl(url); assertAllowed(target); } catch (e) { setError(e); setBusy(false); return; }
     const b = await browserAttempt(target);
     setBrowser(b);
     try {
@@ -305,7 +306,7 @@ function UrlTab() {
       )}
 
       {error && (
-        <Alert color={error instanceof ProxyUnavailableError ? 'orange' : 'red'} title="2 · DevForge proxy">
+        <Alert color={error instanceof ProxyUnavailableError ? 'orange' : 'red'} title={error.name === 'BlockedTargetError' ? 'Not allowed' : '2 · DevForge proxy'}>
           <Text size="sm">{error.message}</Text>
           {error instanceof ProxyUnavailableError && <Text size="xs" mt={4}>You can still paste the headers in the “Paste raw headers” tab.</Text>}
         </Alert>

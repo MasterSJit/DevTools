@@ -8,3 +8,4 @@ proxy/node_modules/
 proxy/.wrangler/
 .claude
 public/monaco/
+proxy/wrangler.production.toml

@@ -5,7 +5,7 @@
   "description": "Cloudflare Worker that lets DevForge read other sites' headers/HTML and run port-43 WHOIS",
   "scripts": {
     "dev": "wrangler dev --port 8787",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --config wrangler.production.toml",
     "tail": "wrangler tail"
   },
   "devDependencies": {

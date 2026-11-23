@@ -9,10 +9,31 @@ const MAX_REDIRECTS = 5;
 const FETCH_TIMEOUT_MS = 10000;
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
 const BODY_TYPES = /^(text\/(html|plain|xml)|application\/(xhtml\+xml|xml|rss\+xml|atom\+xml))/i;
-const USER_AGENT = 'Mozilla/5.0 (compatible; DevForgeInspector/1.0; +https://dev-tools.serversbay.com)';
+const USER_AGENT = 'Mozilla/5.0 (compatible; DevForgeInspector/1.0)';
 
 class HttpError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
+}
+
+// ── Blocked targets ──────────────────────────────────────────────────────────
+// The Worker never scans the site it serves (its own hostname + parent domain) or anything in the
+// BLOCKED_DOMAINS variable (comma-separated). Nothing is hard-coded.
+const TWO_LABEL_SUFFIXES = new Set(['co.uk', 'org.uk', 'ac.uk', 'gov.uk', 'co.in', 'net.in', 'org.in', 'com.au', 'net.au', 'org.au',
+  'co.nz', 'co.jp', 'co.kr', 'com.br', 'com.cn', 'com.mx', 'com.sg', 'com.tr', 'co.za', 'com.hk', 'com.tw', 'com.ar', 'co.id']);
+const parentDomain = (host) => {
+  const l = host.split('.');
+  if (l.length <= 2) return host;
+  return TWO_LABEL_SUFFIXES.has(l.slice(-2).join('.')) ? l.slice(-3).join('.') : l.slice(-2).join('.');
+};
+function blockedSet(env, requestHost) {
+  const set = new Set((env.BLOCKED_DOMAINS || '').split(',').map((d) => d.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/[/:].*$/, '').replace(/\.$/, '')).filter(Boolean));
+  const own = requestHost.toLowerCase();
+  if (own && !/^(localhost|127\.|\[?::1)/.test(own) && !own.endsWith('.workers.dev')) { set.add(own); set.add(parentDomain(own)); }
+  return set;
+}
+function assertNotBlocked(host, blocked) {
+  const h = host.toLowerCase().replace(/\.$/, '');
+  for (const d of blocked) if (h === d || h.endsWith(`.${d}`)) throw new HttpError(`Scanning ${h} is disabled on this service.`, 403);
 }
 
 export default {
@@ -36,8 +57,13 @@ export default {
 
     try {
       const path = url.pathname.replace(/^\/api/, '') || '/';
-      if (path === '/inspect') return json(await inspect(url.searchParams), 200, cors);
-      if (path === '/whois') return json(await cached(request, ctx, () => whois(url.searchParams.get('q'))), 200, cors);
+      const blocked = blockedSet(env, url.hostname);
+      if (path === '/inspect') return json(await inspect(url.searchParams, blocked), 200, cors);
+      if (path === '/whois') {
+        // Check before the cache so an earlier cached answer can't be served for a now-blocked domain.
+        assertNotBlocked(String(url.searchParams.get('q') || '').trim(), blocked);
+        return json(await cached(request, ctx, () => whois(url.searchParams.get('q'), blocked)), 200, cors);
+      }
       if (path === '/health') return json({ ok: true }, 200, cors);
       return json({ error: 'Not found' }, 404, cors);
     } catch (e) {
@@ -139,7 +165,7 @@ function headerList(res) {
   return [...list, ...cookies.map((c) => ['set-cookie', maskCookie(c)])];
 }
 
-async function inspect(params) {
+async function inspect(params, blocked) {
   const start = validateUrl(params.get('url'));
   const wantBody = params.get('body') === '1';
   const redirects = [];
@@ -147,6 +173,7 @@ async function inspect(params) {
   let current = start;
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    assertNotBlocked(current.hostname, blocked); // checked on every hop, so redirects can't reach a blocked host
     await assertPublicHost(current.hostname);
     const t0 = Date.now();
     const res = await fetch(current.href, {
@@ -231,9 +258,10 @@ async function whoisQuery(host, query) {
   return new TextDecoder().decode(out);
 }
 
-async function whois(q) {
+async function whois(q, blocked) {
   const domain = String(q || '').trim().toLowerCase().replace(/\.$/, '');
   if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(domain)) throw new HttpError('Enter a domain like example.io');
+  assertNotBlocked(domain, blocked);
   const tld = domain.split('.').pop();
   const iana = await whoisQuery('whois.iana.org', tld);
   const server = (iana.match(/^refer:\s*(\S+)/im) || iana.match(/^whois:\s*(\S+)/im) || [])[1];

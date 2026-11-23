@@ -11,6 +11,12 @@ import { join, extname } from 'node:path';
 
 const OUT = join(process.cwd(), 'out');
 
+// In CI a missing site URL would publish a sitemap / canonical URLs pointing at localhost.
+if (process.env.CI && !process.env.NEXT_PUBLIC_SITE_URL) {
+  console.error('harden-static: NEXT_PUBLIC_SITE_URL is not set. Add a repository variable SITE_URL (e.g. https://tools.example.com).');
+  process.exit(1);
+}
+
 const walk = (dir) => readdirSync(dir).flatMap((f) => {
   const p = join(dir, f);
   return statSync(p).isDirectory() ? walk(p) : [p];

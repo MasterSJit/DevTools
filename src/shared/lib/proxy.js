@@ -1,7 +1,9 @@
 // Client for the DevForge Cloudflare Worker (see /proxy). Only used for things browsers can't do:
 // reading another site's headers/HTML and legacy port-43 WHOIS.
-// Production: the Worker is routed at https://dev-tools.serversbay.com/api/* (same origin).
+// Production: route the Worker at https://<your-site>/api/* (same origin) — see proxy/README.md.
 // Local dev: set NEXT_PUBLIC_PROXY_URL=http://localhost:8787/api and run `npx wrangler dev` in /proxy.
+
+import { assertAllowed } from './blocklist';
 
 export const PROXY_BASE = (process.env.NEXT_PUBLIC_PROXY_URL || '/api').replace(/\/$/, '');
 
@@ -13,6 +15,8 @@ export class ProxyUnavailableError extends Error {
 }
 
 export async function callProxy(endpoint, params, { timeout = 25000 } = {}) {
+  if (params?.url) assertAllowed(params.url);
+  if (params?.q) assertAllowed(params.q);
   let res;
   try {
     res = await fetch(`${PROXY_BASE}/${endpoint}?${new URLSearchParams(params)}`, { signal: AbortSignal.timeout(timeout) });

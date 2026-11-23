@@ -8,6 +8,7 @@ import { Panel, FindingList, Grade } from '@/shared/components/ui';
 import FixGuides from '@/shared/components/FixGuides';
 import { parseDer, decodeSpki } from '@/shared/lib/asn1';
 import { base64ToBytes } from '@/shared/lib/encoding';
+import { assertAllowed } from '@/shared/lib/blocklist';
 
 const TYPES = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'CAA', 'SRV', 'PTR', 'DS', 'DNSKEY', 'HTTPS'];
 const TYPE_NUM = { 1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 12: 'PTR', 15: 'MX', 16: 'TXT', 28: 'AAAA', 33: 'SRV', 43: 'DS', 48: 'DNSKEY', 65: 'HTTPS', 257: 'CAA' };
@@ -18,6 +19,7 @@ const RESOLVERS = {
 const RCODES = { 0: 'NOERROR', 1: 'FORMERR', 2: 'SERVFAIL', 3: 'NXDOMAIN', 5: 'REFUSED' };
 
 async function query(resolver, name, type) {
+  assertAllowed(name);
   const res = await fetch(RESOLVERS[resolver](name, type), { headers: { accept: 'application/dns-json' } });
   if (!res.ok) throw new Error(`Resolver returned HTTP ${res.status}`);
   return res.json();
@@ -53,7 +55,7 @@ function Records() {
       if (ptr) name = ptr;
       const out = await Promise.all(list.map(async (t) => ({ type: t, ...(await query(resolver, name, t)) })));
       setResults({ name, list: out });
-    } catch (e) { setError(`${e.message}. Your network or an extension may block DNS-over-HTTPS.`); setResults(null); }
+    } catch (e) { setError(e.name === 'BlockedTargetError' ? e.message : `${e.message}. Your network or an extension may block DNS-over-HTTPS.`); setResults(null); }
     setBusy(false);
   };
 
@@ -151,7 +153,7 @@ function dkimKeyInfo(record) {
 }
 
 function EmailSecurity() {
-  const [domain, setDomain] = useState('serversbay.com');
+  const [domain, setDomain] = useState('example.com');
   const [selectors, setSelectors] = useState('');
   const [r, setR] = useState(null);
   const [busy, setBusy] = useState(false);

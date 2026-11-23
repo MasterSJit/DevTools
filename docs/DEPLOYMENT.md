@@ -92,7 +92,7 @@ On **OpenLiteSpeed or Nginx** backends, `Header` lines in `.htaccess` may be ign
 
 ## Cloudflare settings
 
-For the `serversbay.com` zone, after each first deploy or big change:
+For the `example.com` zone, after each first deploy or big change:
 
 1. **Caching → Configuration → Purge Everything.**
 2. **Speed → Optimization → Rocket Loader → Off** (it breaks Next.js scripts).
@@ -106,8 +106,8 @@ For the `serversbay.com` zone, after each first deploy or big change:
 ```bash
 cd proxy
 npm install
-npx wrangler login      # log in to the Cloudflare account that owns serversbay.com
-npx wrangler deploy     # deploys devforge-proxy with the route dev-tools.serversbay.com/api/*
+npx wrangler login      # log in to the Cloudflare account that owns example.com
+npx wrangler deploy     # deploys devforge-proxy with the route tools.example.com/api/*
 ```
 
 If the deploy fails because of the `ratelimits` binding, remove the `[[ratelimits]]` block from `proxy/wrangler.toml` and deploy again — the Worker works without it (just without the per-IP limit).
@@ -119,17 +119,17 @@ Endpoints, safety limits and local development: [proxy/README.md](../proxy/READM
 ## Verification
 
 ```bash
-curl -sI https://dev-tools.serversbay.com/tools/hash-generator/ | grep -iE "^HTTP|cross-origin-opener|x-frame|x-content-type"
+curl -sI https://tools.example.com/tools/hash-generator/ | grep -iE "^HTTP|cross-origin-opener|x-frame|x-content-type"
 ```
 
 Expect `HTTP/2 200` and the security headers listed above.
 
 ```bash
-curl -s https://dev-tools.serversbay.com/robots.txt
+curl -s https://tools.example.com/robots.txt
 ```
 
 ```bash
-curl -s https://dev-tools.serversbay.com/api/health
+curl -s https://tools.example.com/api/health
 ```
 
 Expect `{"ok":true}` once the Worker is deployed. Then in the browser:
@@ -137,7 +137,7 @@ Expect `{"ok":true}` once the Worker is deployed. Then in the browser:
 - the home page shows the tool count and categories;
 - `/tools/css-tools/` forwards to the Code Formatter;
 - Security Headers → *Check a URL* shows “Fetched via DevForge proxy”;
-- SEO & Performance analyzes `https://dev-tools.serversbay.com`.
+- SEO & Performance analyzes `https://tools.example.com`.
 
 ---
 
